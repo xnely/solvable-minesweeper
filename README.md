@@ -1,13 +1,9 @@
-# GNOME Mines
+# Solvable Mines
 
-Mines (previously gnomine) is a puzzle game where you locate mines floating in an ocean using only your brain and a little bit of luck.
+A fork of [GNOME-mines](https://github.com/GNOME/gnome-mines) that changes how boards are generated. \
+A puzzle game is best played solving puzzles, not taking chances. \
+After your first click, an AI checks the board for any insolvable states and removes them.
 
-[![Download on Flathub](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Flathub-badge-en.svg/240px-Flathub-badge-en.svg.png)](https://flathub.org/apps/details/org.gnome.Mines)
+# NOTICE
 
-## Useful links
-
-- Homepage: <https://wiki.gnome.org/Apps/Mines>
-- User manual: <https://help.gnome.org/users/gnome-mines/stable/>
-- Report issues: <https://gitlab.gnome.org/GNOME/gnome-mines/issues/>
-- Donate: <https://www.gnome.org/friends/>
-- Translate: <https://wiki.gnome.org/TranslationProject>
+Solvable Mines is under construction. It is not playable at this time.
