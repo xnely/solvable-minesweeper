@@ -48,8 +48,9 @@ private const Neighbour neighbour_map[] =
     { -1,  0 }
 };
 
-//extern void solvable(int argc, string[] argv);
-extern void solvable(uint width, uint height, int count, ...); // OUTSIDE CLASS
+// extern must be outside of class to prevent name mangling
+/** check and fix unsolvable states */
+extern void solvable(uint width, uint height, int count, ...);
 
 public class Minefield : Object
 {
@@ -336,39 +337,14 @@ public class Minefield : Object
         return n_flags > n_mines;
     }
 
-    /*
-    public enum FlagType
-{
-    NONE,
-    FLAG,
-    MAYBE
-}
-protected class Location : Object
-{
-    public bool has_mine = false;
-    public bool cleared = false;
-    public FlagType flag = FlagType.NONE;
-    public int adjacent_mines = 0;
-}
-     */
-
     /* Check minefield for solvability. Fix any insolvable */
-    //  extern void solvable(string s); // MUST BE OUTSIDE CLASS
     void make_solvable (uint x, uint y)
     {
-        //  string[] args = {"bruh", "it dont", "be how it be"};
-
-        //  int a = (int)locations[x,y].adjacent_mines;
-        
         /** convert Locations to C readible struct */
         uint8[,] board;
         board = new uint8[width,height];
         for(int w=0; w<width; ++w){
             for(int h=0; h<height; ++h){
-                //  board[w,h,0] = (int)locations[w,h].has_mine;
-                //  board[w,h,1] = (int)locations[w,h].cleared;
-                //  board[w,h,2] = (int)locations[w,h].flag;
-                //  board[w,h,3] = (int)locations[w,h].adjacent_mines;
                 board[w,h] = (uint8)locations[w,h].adjacent_mines | ((uint8)locations[w,h].has_mine << 7) | ((uint8)locations[w,h].cleared << 6);
             }
         } // 11001111
@@ -378,24 +354,13 @@ protected class Location : Object
         /** convert back to Locations */
         for(int w=0; w<width; ++w){
             for(int h=0; h<height; ++h){
-                //  locations[w,h].has_mine = (bool)board[w,h,0];
-                //  locations[w,h].cleared = (bool)board[w,h,1];
-                //  locations[w,h].flag = (FlagType)board[w,h,2];
-                //  locations[w,h].adjacent_mines = board[w,h,3];
                 locations[w,h].has_mine = (bool)((board[w,h] >> 7)&1);
                 locations[w,h].cleared = (bool)((board[w,h] >> 6)&1);
                 locations[w,h].adjacent_mines = board[w,h];
             }
         }
-        string res = "VALA n_mines = %u\n".printf(n_mines);
-        print(res);
-
-        //  locations[x,y].has_mine = true;
-        //  for(var i=0; i < height; ++i){
-        //      for(var j=0; j < width; ++j){
-        //          clocations[j,i] = locations[j,i];
-        //      }
-        //  }
+        //  string res = "VALA n_mines = %u\n".printf(n_mines);
+        //  print(res);
     }
 
     /* Randomly set the mines, but avoid the current and adjacent locations */
