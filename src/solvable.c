@@ -139,20 +139,6 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
     found = 0;
 
     // CHECK FOR SOLVABLILITY
-    
-    // clear first
-    // clear recursive / build ref/edge list
-    // do while flag
-    //  search ref list / clear & flip flag
-    //  if !flag
-    //   while any edge unchecked (max is unchecked * 2)
-    //    simulate edge state flagged
-    //    if cannot be flagged
-    //     clear, break, flip flag
-    //    if cannot be cleared
-    //     flag space, update refs, flip flag
-    //   if !flag
-    //    move mine if possible, flip flag, break
 
     // Mines are edges at start due:
     //  Found mines are neither cleared nor an edge
@@ -167,9 +153,21 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
 
     clear_recursive(*sx, *sy);
     
-    bool stuckCounting = false;
-    while(1){
+    /** TODO: Unhandled case:
+     *      Where:
+     *          Unseen = uncleared spaces that are not next to a number (uncleared, non-edge)
+     *          Min_Mines = minimum number of mines used in all possible states
+     *          found = # of mines found thus far
+     *          n_mines = total # of mines on board
+     * 
+     *      If n_mines - found - Min_mines == 0 && Unseen > 0
+     *          All Unseen can be cleared
+     */
+
+    bool solvable = true;
+    while(solvable){
         /** Try counting */
+        bool stuckCounting = false;
         while(!stuckCounting){
             stuckCounting = true;
             for(int x=0; x<width; ++x){
@@ -245,9 +243,8 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
         struct position knownSpacePos = {0, 0};
 
         while(knownSpace == UNKNOWN){
-            /** INSERT: The big code (Initial possible state) */
 
-            { /** Initial possible state */
+            { /** Find possible state */
                 bool debug_status = false;
                 struct edge_knowledge_ref *cursor = start;
                 int localCount = found;
@@ -315,8 +312,8 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                                             goto DONE;
                                         }
                                         if(cursor == pre){
-                                            if(cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
-                                            else printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
+                                            // if(cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
+                                            // else printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
                                             // knownSpace = !cursor->maybeMine;
                                             if(!cursor->maybeMine) knownSpace = _CLEAR;
                                             else knownSpace = _MINE;
@@ -423,6 +420,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                 if(allEither){
                     if(knownSpace != UNKNOWN) printf("ASSERTION! allEither and knownSpace!\n");
                     printf("UNSOLVABLE!\n");
+                    solvable = false;
                     break;
                 }
             }
@@ -491,133 +489,6 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
             }
         }
 
-        // { /** Initial possible state */
-        //     bool debug_status = false;
-        //     struct edge_knowledge_ref *cursor = start;
-        //     int localCount = found;
-        //     if(debug_status) printf("First: [%d, %d]\n", cursor->pos.x, cursor->pos.y);
-        //     while(cursor){
-        //         bool oversaturated = false;
-        //         if(!cursor->maybeMine){
-        //             if(debug_status) printf("[%d, %d] trying clear\n",cursor->pos.x, cursor->pos.y);
-        //             SPACE(cursor->pos.x, cursor->pos.y) UNSET EDGE;
-        //             bool hung = false;
-        //             for(int i=0; i<cursor->refCount; ++i){ // Check left hanging
-        //                 int nx, ny;
-        //                 int adjacentEdges = 0;
-        //                 // if(debug_status) printf(" [%d, %d] checking edges\n",cursor->refs[i].x, cursor->refs[i].y);
-        //                 FOR_EACH_NEIGHBOR(nx, ny, cursor->refs[i].x, cursor->refs[i].y){
-        //                     // if(debug_status) printf(" [%d, %d] check if edge\n",nx, ny);
-        //                     if(SPACE(nx, ny) IS_EDGE){
-        //                         ++adjacentEdges;
-        //                         // if(debug_status) printf(" [%d, %d] is edge\n",nx, ny);
-        //                     }else{
-        //                         // if(debug_status) printf(" [%d, %d] is not an edge\n",nx, ny);
-        //                     }
-        //                 }
-        //                 if((SPACE(cursor->refs[i].x, cursor->refs[i].y) ADJACENT) > adjacentEdges){
-        //                     hung = true;
-        //                     // if(debug_status) printf(" [%d, %d] left hanging %d adjacent, %d edges\n",cursor->refs[i].x, cursor->refs[i].y,(SPACE(cursor->refs[i].x, cursor->refs[i].y) ADJACENT), adjacentEdges);
-        //                 } else{
-        //                     // if(debug_status) printf(" [%d, %d] ok %d adjacent, %d edges\n",cursor->refs[i].x, cursor->refs[i].y,(SPACE(cursor->refs[i].x, cursor->refs[i].y) ADJACENT), adjacentEdges);
-        //                 }
-        //             }
-        //             if(hung){ // Continue if none hung
-        //                 if(debug_status) printf("[%d, %d] trying mine\n",cursor->pos.x, cursor->pos.y);
-        //                 // Can't be clear, try mine
-        //                 if(localCount==*n_mines){
-        //                     oversaturated = true;
-        //                     if(debug_status) printf("TOO MANY MINES [%d, %d]\n",cursor->pos.x, cursor->pos.y);
-        //                 }
-        //                 for(int i=0; i<cursor->refCount; ++i){
-        //                     if((SPACE(cursor->refs[i].x, cursor->refs[i].y) ADJACENT) == 0){
-        //                         oversaturated = true;
-        //                         if(debug_status) printf("[%d, %d] OVERSATURATED\n",cursor->refs[i].x, cursor->refs[i].y);
-        //                     }
-        //                 } /** TODO: CAUSES ADJACENT CORRUPTION 0 -= 1 */
-        //                 if(oversaturated){
-        //                     // Oversaturated, roll back and place mine at last clear space
-        //                     SPACE(cursor->pos.x, cursor->pos.y) SET EDGE;
-        //                     cursor = cursor->prev;
-        //                     bool rollback_oversaturated;
-        //                     do{
-        //                         rollback_oversaturated = false;
-        //                         while(cursor->maybeMine){
-        //                             if(debug_status) printf("[%d, %d] unset (rollback)\n",cursor->pos.x, cursor->pos.y);
-        //                             // Set mines back to normal
-        //                             cursor->maybeMine = false;
-        //                             --localCount;
-        //                             SPACE(cursor->pos.x, cursor->pos.y) SET EDGE;
-        //                             for(int i=0; i<cursor->refCount; ++i){
-        //                                 ++SPACE(cursor->refs[i].x, cursor->refs[i].y);
-        //                             }
-        //                             if(!pre && cursor == start){
-        //                                 if(debug_status) printf("[%d, %d] MUST BE MINE (rollback)\n", cursor->pos.x, cursor->pos.y);
-        //                                 knownSpace = MINE;
-        //                                 knownSpacePos.x = cursor->pos.x;
-        //                                 knownSpacePos.y = cursor->pos.y;
-        //                                 goto DONE;
-        //                             }
-        //                             if(cursor == pre){
-        //                                 if(debug_status && !cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
-        //                                 if(debug_status && cursor->maybeMine) printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
-        //                                 knownSpace = !cursor->maybeMine;
-        //                                 knownSpacePos.x = cursor->pos.x;
-        //                                 knownSpacePos.y = cursor->pos.y;
-        //                                 goto DONE;
-        //                             }
-        //                             cursor = cursor->prev;
-        //                         }
-        //                         SPACE(cursor->pos.x, cursor->pos.y) SET EDGE;
-        //                         // Check if first non-mine can be mine
-        //                         for(int i=0; i<cursor->refCount; ++i){
-        //                             if(localCount==*n_mines){
-        //                                 oversaturated = true;
-        //                                 if(debug_status) printf("TOO MANY MINES [%d, %d] (rollback)\n",cursor->pos.x, cursor->pos.y);
-        //                             }
-        //                             if((SPACE(cursor->refs[i].x, cursor->refs[i].y) ADJACENT) == 0){
-        //                                 rollback_oversaturated = true;
-        //                                 if(debug_status) printf("[%d, %d] oversaturated (rollback)\n",cursor->refs[i].x, cursor->refs[i].y);
-        //                             }
-        //                         }
-        //                         // Continue rollback. Space could not be made mine
-        //                         if(rollback_oversaturated){
-        //                             cursor = cursor->prev;
-        //                         }else{ // Set it as mine and advance
-        //                             if(debug_status) printf("[%d, %d] mine placed (rollback)\n",cursor->pos.x, cursor->pos.y);
-        //                             SPACE(cursor->pos.x, cursor->pos.y) UNSET EDGE;
-        //                             cursor->maybeMine = true;
-        //                             ++localCount;
-        //                             for(int i=0; i<cursor->refCount; ++i){
-        //                                 --SPACE(cursor->refs[i].x, cursor->refs[i].y);
-        //                             }
-        //                             cursor = cursor->next;
-        //                         }
-        //                     } while(rollback_oversaturated);
-        //                 }else{
-        //                     if(!pre && cursor == start){
-        //                         if(debug_status) printf("[%d, %d] MUST BE MINE\n", cursor->pos.x, cursor->pos.y);
-        //                         knownSpace = MINE;
-        //                         knownSpacePos.x = cursor->pos.x;
-        //                         knownSpacePos.y = cursor->pos.y;
-        //                         goto DONE;
-        //                     }
-        //                     // GTG, place mine
-        //                     ++localCount;
-        //                     cursor->maybeMine = true;
-        //                     for(int i=0; i<cursor->refCount; ++i){
-        //                         --SPACE(cursor->refs[i].x, cursor->refs[i].y);
-        //                     }
-        //                 }
-        //             }
-        //         }else{
-        //             printf("ASSERTION: maybe mine=false on call\n");
-        //         }
-        //         if(!oversaturated) cursor = cursor->next;
-        //     }
-        //     DONE:
-        // }
-
         // printf("Possible state found\n");
         { /** DEBUG: Print found state */
             struct edge_knowledge_ref *cursor = start;
@@ -635,17 +506,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                 start = next;
             }
         }
-        break;
-
-        // List of edges -> unknown=-1 | either=0 | clear | mine
-        // Use recursive decent to find possible state
-        // --adjacent on way down, ++adjacent on way up
-        // Working list of edges is copied after possible state found
-        // WHILE 
-        //  Working list is searched for first !either ASSERTION NOT UNKNOWN
-        //  repeat recursive decent while conforming to edge knowledge
-        //  IF ALL == Either, unsolvable
-        //   fix unsolvable
+        // break;
     }
 
     /** DEBUG: test macros */
@@ -653,7 +514,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
     // if(SPACE(*sx, *sy) HAS_MINE) printf("POG\n");
     // printf("Adjacent to 0,0: %d\n", SPACE(0, 0) ADJACENT);
     /** DEBUG: print info */
-    bool debug = true;
+    bool debug = false;
     if(debug) printf("FOUND: %d\n", found);
     for(int w=0; w<width; ++w){
         if(debug) printf("\n[%d] ", w);
