@@ -152,17 +152,6 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
     }
 
     clear_recursive(*sx, *sy);
-    
-    /** TODO: Unhandled case:
-     *      Where:
-     *          Unseen = uncleared spaces that are not next to a number (uncleared, non-edge)
-     *          Min_Mines = minimum number of mines used in all possible states
-     *          found = # of mines found thus far
-     *          n_mines = total # of mines on board
-     * 
-     *      If n_mines - found - Min_mines == 0 && Unseen > 0
-     *          All Unseen can be cleared
-     */
 
     bool solvable = true;
     while(solvable){
@@ -242,12 +231,14 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
         enum edge_possible knownSpace = UNKNOWN;
         struct position knownSpacePos = {0, 0};
 
+        int min_mines = INT_MAX;
         while(knownSpace == UNKNOWN){
-
-            { /** Find possible state */
+            int localCount = found;
+            if(pre && pre->maybeMine) ++localCount;
+            /** Find possible state */
+            {
                 bool debug_status = false;
                 struct edge_knowledge_ref *cursor = start;
-                int localCount = found;
                 if(debug_status) printf("First: [%d, %d]\n", cursor->pos.x, cursor->pos.y);
                 while(cursor){
                     bool oversaturated = false;
@@ -312,8 +303,8 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                                             goto DONE;
                                         }
                                         if(cursor == pre){
-                                            // if(cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
-                                            // else printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
+                                            if(cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
+                                            else printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
                                             // knownSpace = !cursor->maybeMine;
                                             if(!cursor->maybeMine) knownSpace = _CLEAR;
                                             else knownSpace = _MINE;
@@ -326,7 +317,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                                     SPACE(cursor->pos.x, cursor->pos.y) SET EDGE;
                                     // Check if first non-mine can be mine
                                     for(int i=0; i<cursor->refCount; ++i){
-                                        if(localCount+1==*n_mines){
+                                        if(localCount==*n_mines){
                                             oversaturated = true;
                                             if(debug_status) 
                                                 printf("TOO MANY MINES [%d, %d] (rollback)\n",cursor->pos.x, cursor->pos.y);
@@ -377,6 +368,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
 
             if(pre && pre->maybeMine){ // Set pre back to normal
                 pre->maybeMine = false;
+                SPACE(pre->pos.x, pre->pos.y) SET EDGE; /** DEBUG: pre was not edge! */
                 for(int i=0; i<pre->refCount; ++i){
                     ++SPACE(pre->refs[i].x, pre->refs[i].y);
                 }
@@ -417,11 +409,32 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                     }
                     cursor = cursor->next;
                 }
+                /** Handle unsolvable */
+                if(localCount < min_mines) min_mines = localCount;
                 if(allEither){
                     if(knownSpace != UNKNOWN) printf("ASSERTION! allEither and knownSpace!\n");
-                    printf("UNSOLVABLE!\n");
-                    solvable = false;
-                    break;
+                    bool found_unseen = false;
+                    if(*n_mines - found - min_mines == 0){
+                        for(int x=0; x<width; ++x){
+                            for(int y=0; y<height; ++y){
+                                if(!(SPACE(x, y) IS_CLEAR) && !(SPACE(x, y) IS_EDGE)){
+                                    found_unseen = true;
+                                    printf("CLEARED [%d, %d] BY MINE COUNT!!!! ---------------------------------------\n", x, y);
+                                    clear_recursive(x, y);
+                                }
+                            }
+                        }
+                    }
+                    if(!found_unseen){
+                        /** TODO: */
+                        /** If move_success, build list of spaces to try */
+                        /** If < 2 spaces, give up */
+                        /** Move a mine and remove used spaces */
+                        printf("min_mines was %d\n", min_mines);
+                        printf("UNSOLVABLE!\n");
+                        solvable = false;
+                        break;
+                    }
                 }
             }
             if(knownSpace != UNKNOWN){ // Found!
@@ -467,7 +480,6 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                         if(cursor==start){ // Move to before start
                             pre = start;
                             start = start->next;
-                            start->prev = pre;
                         }else if(cursor->next == NULL){
                             pre = cursor;
                             cursor->prev->next = NULL;
@@ -482,6 +494,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                             cursor->next = start;
                             start->prev = cursor;
                         }
+                        SPACE(pre->pos.x, pre->pos.y) UNSET EDGE; /** DEBUG: pre not edge! */
                         break;
                     }
                     cursor = cursor->next;
