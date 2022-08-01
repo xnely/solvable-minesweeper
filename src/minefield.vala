@@ -356,7 +356,7 @@ public class Minefield : Object
             for(int h=0; h<height; ++h){
                 locations[w,h].has_mine = (bool)((board[w,h] >> 7)&1);
                 locations[w,h].cleared = (bool)((board[w,h] >> 6)&1);
-                locations[w,h].adjacent_mines = board[w,h];
+                locations[w,h].adjacent_mines = (uint8)board[w,h];
             }
         }
         //  string res = "VALA n_mines = %u\n".printf(n_mines);
