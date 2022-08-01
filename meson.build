@@ -1,4 +1,4 @@
-project ('gnome-mines', ['vala', 'c'],
+project ('solvable-mines', ['vala', 'c'],
          version: '43.alpha',
          license: 'GPLv3+',
          default_options: [

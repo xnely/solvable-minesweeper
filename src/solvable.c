@@ -145,7 +145,7 @@ static void force(int x, int y){
  *  should cause a rollback
  * */
 
-void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
+int solvable(unsigned int swidth, unsigned int sheight, int count, ...){
     printf("Hello from C!\n");
     
     // Assign arguments
@@ -187,7 +187,7 @@ void solvable(unsigned int swidth, unsigned int sheight, int count, ...){
     // Used for managing moving mines
     bool move_success = true;
     bool move_active = false;
-    struct pos_list{ /** TODO: ADD if pos is a real edge. Use to always change the real edge */
+    struct pos_list{
         struct position pos;
         struct pos_list *next;
     };
@@ -495,8 +495,7 @@ CONTINUE_LOOP:;
                     
                 }
                 if(knownSpace != UNKNOWN && solvable){ // Found!
-                    /** TODO: Detect move success */
-                    if(move_active){ /** TODO: Because move_active on */
+                    if(move_active){
                         move_success = true;
                         struct pos_list *cursor = available_spaces;
                         while(cursor){
@@ -590,10 +589,6 @@ CONTINUE_LOOP:;
             }
         }
         if(!solvable){
-            /** TODO: */
-            /** If move_success, build list of spaces to try */
-            /** If < 2 spaces or no mines, give up */
-            /** Move a mine and remove used spaces */
             printf("Unsolvable reached! Trying to move mine...\n");
             move_active = true;
             solvable = true;
@@ -700,9 +695,6 @@ CONTINUE_LOOP:;
                 }
             }
             // MOVE Mine
-            /** TODO:
-             *  Moving mines does not correctly updates Edges / References
-             */
             {
                 // struct pos_list *cursor = available_spaces;
                 // struct pos_list *mine_space = NULL;
@@ -843,4 +835,10 @@ CONTINUE_LOOP:;
     }
     if(debug) printf("\n");
     free(vboard);
+    
+    // if(found == *n_mines) *returns = 0;
+    // else *returns = -1;
+    if(found == *n_mines) return 0;
+    else return -1;
+    // return -1;
 }

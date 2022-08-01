@@ -50,7 +50,7 @@ private const Neighbour neighbour_map[] =
 
 // extern must be outside of class to prevent name mangling
 /** check and fix unsolvable states */
-extern void solvable(uint width, uint height, int count, ...);
+extern int solvable(uint width, uint height, int count, ...);
 
 public class Minefield : Object
 {
@@ -227,7 +227,11 @@ public class Minefield : Object
         if (!placed_mines)
         {
             place_mines (x, y);
-            make_solvable (x, y);
+            //  make_solvable (x, y);
+            while(make_solvable (x, y) == false){
+                print("Failed to fix board. Retrying...\n");
+                place_mines (x, y);
+            }
             placed_mines = true;
         }
 
@@ -338,7 +342,7 @@ public class Minefield : Object
     }
 
     /* Check minefield for solvability. Fix any insolvable */
-    void make_solvable (uint x, uint y)
+    bool make_solvable (uint x, uint y)
     {
         /** convert Locations to C readible struct */
         uint8[,] board;
@@ -349,18 +353,27 @@ public class Minefield : Object
             }
         } // 11001111
 
-        solvable(width, height, 4, board, &x, &y, &n_mines);
+        //  if(solvable(width, height, 4, board, &x, &y, &n_mines) != 0) fixed = false;
+        int fixed = solvable(width, height, 4, board, &x, &y, &n_mines);
 
         /** convert back to Locations */
         for(int w=0; w<width; ++w){
             for(int h=0; h<height; ++h){
-                locations[w,h].has_mine = (bool)((board[w,h] >> 7)&1);
-                locations[w,h].cleared = (bool)((board[w,h] >> 6)&1);
-                locations[w,h].adjacent_mines = (uint8)board[w,h];
+                if(fixed == 0){
+                    locations[w,h].has_mine = (bool)((board[w,h] >> 7)&1);
+                    locations[w,h].cleared = (bool)((board[w,h] >> 6)&1);
+                    locations[w,h].adjacent_mines = (uint8)board[w,h];
+                }else{
+                    locations[w,h].has_mine = false;
+                    locations[w,h].cleared = false;
+                    locations[w,h].adjacent_mines = 0;
+                }
             }
         }
         //  string res = "VALA n_mines = %u\n".printf(n_mines);
         //  print(res);
+        if(fixed == 0) return true;
+        else return false;
     }
 
     /* Randomly set the mines, but avoid the current and adjacent locations */
