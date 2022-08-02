@@ -7,7 +7,7 @@ project ('solvable-mines', ['vala', 'c'],
          ],
          meson_version: '>= 0.59.0')
 
-app_id = 'org.gnome.Mines'
+app_id = 'org.gnome.SolvableMines'
 
 gnome = import ('gnome')
 i18n = import ('i18n')

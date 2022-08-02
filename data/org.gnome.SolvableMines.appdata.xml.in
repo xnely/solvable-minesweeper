@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2013 Michael Catanzaro -->
 <component type="desktop-application">
-  <id>org.gnome.Mines</id>
+  <id>org.gnome.SolvableMines</id>
   <metadata_license>CC0-1.0</metadata_license>
 
   <project_license>GPL-3.0+</project_license>
-  <name>GNOME Mines</name>
+  <name>Solvable Mines</name>
   <summary>Clear hidden mines from a minefield</summary>
   <description>
     <p>
@@ -31,7 +31,7 @@
   <url type="help">https://help.gnome.org/users/gnome-mines/stable/</url>
   <url type="translate">https://wiki.gnome.org/TranslationProject</url>
   <update_contact>robert.roth.off_at_gmail.com</update_contact>
-  <launchable type="desktop-id">org.gnome.Mines.desktop</launchable>
+  <launchable type="desktop-id">org.gnome.SolvableMines.desktop</launchable>
   <project_group>GNOME</project_group>
   <releases>
     <release version="3.31.90" date="2019-02-04" type="development" />

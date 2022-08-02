@@ -114,7 +114,7 @@ static void force(int x, int y){
     FOR_EACH_NEIGHBOR(nx, ny, x, y){
         if((SPACE(nx,ny) HAS_MINE) && (SPACE(nx,ny) IS_EDGE)){ // is mine
             /** DEBUG: Print mine found */
-            printf("[%d,%d] mine found\n", nx, ny);
+            // printf("[%d,%d] mine found\n", nx, ny);
             force_success = true;
             ++found;
             SPACE(nx,ny) UNSET EDGE;
@@ -226,7 +226,7 @@ int solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                     }
                 }
             }
-            printf("-----\n");
+            // printf("-----\n");
         }
 
         if(found == *n_mines) break;
@@ -356,8 +356,8 @@ CONTINUE_LOOP:;
                                             goto DONE;
                                         }
                                         if(cursor == pre){
-                                            if(cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
-                                            else printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
+                                            if(debug_status && cursor->maybeMine) printf("[%d, %d] MUST BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
+                                            else if(debug_status) printf("[%d, %d] MUST NOT BE MINE (rollback, pre)\n", cursor->pos.x, cursor->pos.y);
                                             // knownSpace = !cursor->maybeMine;
                                             if(!cursor->maybeMine) knownSpace = _CLEAR;
                                             else knownSpace = _MINE;
@@ -372,8 +372,7 @@ CONTINUE_LOOP:;
                                     for(int i=0; i<cursor->refCount; ++i){
                                         if(localCount==*n_mines){
                                             oversaturated = true;
-                                            if(debug_status) 
-                                                printf("TOO MANY MINES [%d, %d] (rollback)\n",cursor->pos.x, cursor->pos.y);
+                                            if(debug_status) printf("TOO MANY MINES [%d, %d] (rollback)\n",cursor->pos.x, cursor->pos.y);
                                         }
                                         if((SPACE(cursor->refs[i].x, cursor->refs[i].y) ADJACENT) == 0){
                                             rollback_oversaturated = true;
@@ -472,7 +471,7 @@ CONTINUE_LOOP:;
                             for(int y=0; y<height; ++y){
                                 if(!(SPACE(x, y) IS_CLEAR) && !(SPACE(x, y) IS_EDGE) && !(SPACE(x, y) HAS_MINE)){
                                     found_unseen = true;
-                                    printf("CLEARED [%d, %d] BY MINE COUNT!!!! ---------------------------------------\n", x, y);
+                                    // printf("CLEARED [%d, %d] BY MINE COUNT!!!! ---------------------------------------\n", x, y);
                                     clear_recursive(x, y);
                                     // Hack to pass
                                     knownSpace = _CLEAR;
@@ -663,7 +662,7 @@ CONTINUE_LOOP:;
                             FOR_EACH_NEIGHBOR(nx, ny, cursor->pos.x, cursor->pos.y){
                                 if(!used_edge && SPACE(nx, ny) IS_REF){
                                     used_edge = true;
-                                    printf("[%d, %d] is an edge. using.\n", cursor->pos.x, cursor->pos.y);
+                                    // printf("[%d, %d] is an edge. using.\n", cursor->pos.x, cursor->pos.y);
                                 }
                             }
                         }
@@ -813,7 +812,7 @@ CONTINUE_LOOP:;
     }
 // EXIT:;
 
-    /** TODO: One last test if unseen spaces == unfound mines */
+    /** TODO: One last test if unseen spaces == unfound mines && no edges */
 
     /** DEBUG: test macros */
     // SPACE(*sx, *sy) SET MINE;

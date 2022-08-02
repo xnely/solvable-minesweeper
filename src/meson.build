@@ -2,7 +2,7 @@ resources = gnome.compile_resources ('resources', 'gnome-mines.gresource.xml',
                                      source_dir: '.',
                                      c_name: 'resources')
 
-gnome_mines = executable ('gnome-mines',
+gnome_mines = executable ('solvable-mines',
                           [ 'config.vapi',
                             'gnome-mines.vala',
                             'minefield.vala',
@@ -18,7 +18,7 @@ gnome_mines = executable ('gnome-mines',
                                           libgnome_games_support_dep ],
                           vala_args: [ '--pkg=posix' ],
                           c_args: [ '-DVERSION="@0@"'.format (meson.project_version ()),
-                                    '-DGETTEXT_PACKAGE="gnome-mines"',
+                                    '-DGETTEXT_PACKAGE="solvable-mines"',
                                     '-DLOCALEDIR="@0@"'.format (localedir),
                                     '-DDATA_DIRECTORY="@0@"'.format (pkgdatadir) ],
                           install: true )
