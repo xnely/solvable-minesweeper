@@ -88,34 +88,13 @@ static void clear_recursive(int x, int y){
     }
 }
 
-/** TEMP: Clear real board*/
-static void clear_recursive_real(int x, int y, unsigned char* board){
-    if(*(board+x*height+y) HAS_MINE) return;
-    *(board+x*height+y) SET CLEAR;
-    *(board+x*height+y) UNSET EDGE;
-    int nx, ny;
-    if((*(board+x*height+y) ADJACENT) == 0){ // Empty
-        FOR_EACH_NEIGHBOR(nx, ny, x, y){
-            if(!(*(board+nx*height+ny) IS_CLEAR)) clear_recursive_real(nx, ny, board);
-        }
-    }
-    else{ // Is a seen REF
-        *(board+x*height+y) SET REF;
-        FOR_EACH_NEIGHBOR(nx, ny, x, y){ // Unknowns are edges
-            if(!(*(board+nx*height+ny) IS_CLEAR) && !(*(board+nx*height+ny) HAS_MINE)) *(board+nx*height+ny) SET EDGE;
-        }
-    }
-}
-
 /** "FORCED" 1 mine 1 unknown, etc */
 static void force(int x, int y){
     int nx, ny;
-    bool force_success = false;
     FOR_EACH_NEIGHBOR(nx, ny, x, y){
         if((SPACE(nx,ny) HAS_MINE) && (SPACE(nx,ny) IS_EDGE)){ // is mine
             /** DEBUG: Print mine found */
             // printf("[%d,%d] mine found\n", nx, ny);
-            force_success = true;
             ++found;
             SPACE(nx,ny) UNSET EDGE;
             int nnx, nny;
@@ -285,7 +264,6 @@ int solvable(unsigned int swidth, unsigned int sheight, int count, ...){
 
         int min_mines = INT_MAX;
         while(knownSpace == UNKNOWN){
-CONTINUE_LOOP:;
             int localCount = found;
             if(pre && pre->maybeMine) ++localCount;
             /** Find possible state */
@@ -481,12 +459,6 @@ CONTINUE_LOOP:;
                             }
                         }
                     }
-                    // if(!found_unseen){ /** DEBUG: Test no reset TODO: REMOVE */
-                    //     printf("min_mines was %d\n", min_mines);
-                    //     printf("UNSOLVABLE!\n");
-                    //     solvable = false;
-                    //     break;
-                    // }
                     if(!found_unseen){
                         solvable = false;
                         knownSpace = CLEAR;
@@ -695,29 +667,7 @@ CONTINUE_LOOP:;
             }
             // MOVE Mine
             {
-                // struct pos_list *cursor = available_spaces;
-                // struct pos_list *mine_space = NULL;
-                // struct pos_list *empty_space = NULL;
-                // while(!mine_space || !empty_space){
-                //     if(!mine_space && (SPACE(cursor->pos.x, cursor->pos.y) HAS_MINE)){
-                //         mine_space = cursor;
-                //     }
-                //     if(!empty_space && !(SPACE(cursor->pos.x, cursor->pos.y) HAS_MINE)){
-                //         empty_space = cursor;
-                //     }
-                //     cursor = cursor->next;
-                // }
-                // // Vboard and Real board unset mine
-                // printf("Removing mine at [%d, %d]\n", mine_space->pos.x, mine_space->pos.y);
-                // SPACE(mine_space->pos.x, mine_space->pos.y) UNSET MINE;
-                // *(board+mine_space->pos.x*height+mine_space->pos.y) UNSET MINE;
                 int nx, ny;
-                // FOR_EACH_NEIGHBOR(nx, ny, mine_space->pos.x, mine_space->pos.y){
-                //     --SPACE(nx, ny);
-                //     --(*(board+nx*height+ny));
-                //     if((SPACE(nx, ny) ADJACENT) == 0) clear_recursive(nx, ny);
-                //     // if((*(board+nx*height+ny) ADJACENT) == 0) clear_recursive_real(nx, ny, board);
-                // }
                 // Vboard and Real board set mine
                 printf("Placing mine at [%d, %d]\n", empty_space->pos.x, empty_space->pos.y);
                 // SPACE(empty_space->pos.x, empty_space->pos.y) UNSET REF;
@@ -733,9 +683,7 @@ CONTINUE_LOOP:;
                 printf("Removing mine at [%d, %d]\n", mine_space->pos.x, mine_space->pos.y);
                 SPACE(mine_space->pos.x, mine_space->pos.y) UNSET MINE;
 
-                // if((SPACE(mine_space->pos.x, mine_space->pos.y) ADJACENT) > 0)
                 printf("bf: Adjacent of [%d, %d]: %d\n", mine_space->pos.x, mine_space->pos.y, (SPACE(mine_space->pos.x, mine_space->pos.y) ADJACENT));
-                // --SPACE(mine_space->pos.x, mine_space->pos.y); /** DEBUG: Unset mine needs to have the right mine count */
                 {
                     int adjacent = *(board+mine_space->pos.x*height+mine_space->pos.y) ADJACENT;
                     printf("bf: real adjacent: %d\n", adjacent);
@@ -749,24 +697,13 @@ CONTINUE_LOOP:;
                     SPACE(mine_space->pos.x, mine_space->pos.y) |= adjacent;
                 }
                 printf("aft: Adjacent of [%d, %d]: %d\n", mine_space->pos.x, mine_space->pos.y, (SPACE(mine_space->pos.x, mine_space->pos.y) ADJACENT));
-
                 *(board+mine_space->pos.x*height+mine_space->pos.y) UNSET MINE;
-                // int nx, ny;
-                // bool unseen = true;
-                // FOR_EACH_NEIGHBOR(nx, ny, mine_space->pos.x, mine_space->pos.y){
-                //     if(SPACE(nx, ny) IS_REF) unseen = false;
-                // }
                 FOR_EACH_NEIGHBOR(nx, ny, mine_space->pos.x, mine_space->pos.y){
                     if(((SPACE(nx, ny) ADJACENT) == 0) && !(SPACE(nx, ny) HAS_MINE))
                         printf("Why does a space next to an edge mine have 0 ADJACENT????\n");
                     if(!((SPACE(nx, ny) ADJACENT) == 0))
                         --SPACE(nx, ny);
                     --(*(board+nx*height+ny));
-                    // bool unseen = true;
-                    int nnx, nny;
-                    // FOR_EACH_NEIGHBOR(nnx, nny, nx, ny){
-                    //     if(SPACE(nnx, nny) IS_REF) unseen = false;
-                    // }
                     if((SPACE(nx, ny) ADJACENT) == 0 && !(SPACE(nx, ny) HAS_MINE) && (SPACE(nx, ny) IS_CLEAR)){ // Don't clear unseen
                         printf("Clearing space [%d, %d]\n", nx, ny);
                         SPACE(nx, ny) UNSET REF; // Cleared space should not be a ref
@@ -775,7 +712,6 @@ CONTINUE_LOOP:;
                         printf("Unset REF for apparently unseen space? AT [%d, %d]\n", nx, ny);
                         SPACE(nx, ny) UNSET REF;
                     }
-                    // if((*(board+nx*height+ny) ADJACENT) == 0) clear_recursive_real(nx, ny, board);
                 }
                 // Remove empty_space from list
                 if(mine_space == available_spaces){
@@ -783,11 +719,6 @@ CONTINUE_LOOP:;
                     free(mine_space);
                     mine_space = NULL;
                 }
-                // else if(empty_space == available_spaces){
-                //     available_spaces = available_spaces->next;
-                //     free(empty_space);
-                //     empty_space = NULL;
-                // }
                 struct pos_list *cursor = available_spaces;
                 while(cursor){
                     if(mine_space && cursor->next == mine_space){
@@ -796,23 +727,29 @@ CONTINUE_LOOP:;
                         mine_space = NULL;
                         break;
                     }
-                    // if(empty_space && cursor->next == empty_space){
-                    //     cursor->next = empty_space->next;
-                    //     free(empty_space);
-                    //     empty_space = NULL;
-                    // }
                     cursor = cursor->next;
                 }
-                /** DEBUG: exit after one move */
-                // goto EXIT;
                 knownSpace = CLEAR;
             }
         }
-        // break;
     }
-// EXIT:;
 
-    /** TODO: One last test if unseen spaces == unfound mines && no edges */
+    /** One last test if unseen spaces are all mines */
+    if(found != *n_mines){
+        int unfound = *n_mines - found;
+        int unseen = 0;
+        for(int x=0; x<width; ++x){
+            for(int y=0; y<height; ++y){
+                if(SPACE(x, y) IS_EDGE) goto DONE;
+                if(!(SPACE(x, y) IS_CLEAR) && !(SPACE(x, y) IS_EDGE) && !(SPACE(x, y) HAS_MINE)) ++unseen;
+            }
+        }
+        if(unseen == unfound){
+            found = *n_mines;
+            printf("Final found by mine count");
+        }
+        DONE:;
+    }
 
     /** DEBUG: test macros */
     // SPACE(*sx, *sy) SET MINE;
@@ -835,9 +772,6 @@ CONTINUE_LOOP:;
     if(debug) printf("\n");
     free(vboard);
     
-    // if(found == *n_mines) *returns = 0;
-    // else *returns = -1;
     if(found == *n_mines) return 0;
     else return -1;
-    // return -1;
 }

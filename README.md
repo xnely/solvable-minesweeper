@@ -52,9 +52,3 @@ Or run locally:
 ```bash
 ~/solvable-mines/build$ ./src/solvable-mines
 ```
-
-## Known Issues
-
-An edge cases still exist where solvable games are considered unsolvable: \
-Even if a solution does not make use of all available mines, it is considered possible. \
-These games don't need to be fixed, but they are due to this oversight

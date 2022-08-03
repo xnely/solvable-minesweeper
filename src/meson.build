@@ -19,6 +19,7 @@ gnome_mines = executable ('solvable-mines',
                           vala_args: [ '--pkg=posix' ],
                           c_args: [ '-DVERSION="@0@"'.format (meson.project_version ()),
                                     '-DGETTEXT_PACKAGE="solvable-mines"',
+                                    '-O3',
                                     '-DLOCALEDIR="@0@"'.format (localedir),
                                     '-DDATA_DIRECTORY="@0@"'.format (pkgdatadir) ],
                           install: true )
