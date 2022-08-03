@@ -740,7 +740,7 @@ int solvable(unsigned int swidth, unsigned int sheight, int count, ...){
         int unseen = 0;
         for(int x=0; x<width; ++x){
             for(int y=0; y<height; ++y){
-                if(SPACE(x, y) IS_EDGE) goto DONE;
+                if(SPACE(x, y) IS_EDGE) goto DONE_ALL_MINES_TEST;
                 if(!(SPACE(x, y) IS_CLEAR) && !(SPACE(x, y) IS_EDGE) && !(SPACE(x, y) HAS_MINE)) ++unseen;
             }
         }
@@ -748,7 +748,7 @@ int solvable(unsigned int swidth, unsigned int sheight, int count, ...){
             found = *n_mines;
             printf("Final found by mine count");
         }
-        DONE:;
+        DONE_ALL_MINES_TEST:;
     }
 
     /** DEBUG: test macros */
