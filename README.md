@@ -35,6 +35,13 @@ If the AI ever gets stuck, then the board is unsolvable. \
 The AI will then break the rules and modify the board to try to make it solvable. If it fails, a new board is generated. \
 This slightly increases the likelyhood of mines being in the spaces the furthest from where you clicked, but prevents the performance hit of generating and testing a dozen boards to get a single playable game.
 
+## Dark themes
+
+Since GNOME-mines is lacking a dark theme, a went ahead and added 2. \
+![Theme1](/images/minesdarktheme1.png) ![Theme2](/images/minesdarktheme2.png)
+
+They aren't pretty, but it's better than getting light-moded.
+
 ## Building
 
 clone the repo
