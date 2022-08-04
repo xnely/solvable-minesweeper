@@ -1,6 +1,6 @@
 # Solvable Mines
 
-A fork of [GNOME-mines](https://github.com/GNOME/gnome-mines) that never forces you to take a chance \
+A mod of [GNOME-mines](https://github.com/GNOME/gnome-mines) that never forces you to take a chance \
 Puzzle games are about solving puzzles and finding patterns, not rolling the dice.
 
 ## Explanation
