@@ -450,7 +450,7 @@ int solvable(unsigned int swidth, unsigned int sheight, int count, ...){
                                 if(!(SPACE(x, y) IS_CLEAR) && !(SPACE(x, y) IS_EDGE) && !(SPACE(x, y) HAS_MINE)){
                                     found_unseen = true;
                                     // printf("CLEARED [%d, %d] BY MINE COUNT!!!! ---------------------------------------\n", x, y);
-                                    clear_recursive(x, y);
+                                    // clear_recursive(x, y);
                                     // Hack to pass
                                     knownSpace = _CLEAR;
                                     knownSpacePos.x = x;
